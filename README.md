@@ -167,8 +167,12 @@ Once completed, run this command to start Lustre formatting and create cluster:
 ```
 emf install --exclude nics,hosts,restart_network,os,ntp
 ```
+If you are **upgrading**, add `lustre` to the above command
 
 Congratulations! You now have a fully functioning EXAScaler cluster test environment. Proceed to next section for client mounting.
+
+### Upgrading to a new EXAScaler version
+Repeat the installation section above, replace the main OS image with the new one then go through the steps again. Note that the last command will need to exclude `lustre` step since the filesystem already exist, otherwise, command will fail.
 
 ### Client configuration
 The following steps need to be done each client, `client1` and `client2` separately, modify IP address appropriately.
