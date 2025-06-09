@@ -1,0 +1,138 @@
+version = "6.3.3-2025052100"
+
+[global]
+name = "es633-clust"
+id = "63e34a3d-82b0-4850-9932-cd46c292ee21"
+timezone = "Asia/Bangkok"
+ntp_list = ["vn.pool.ntp.org"]
+multitenancy = true
+
+[global.mgt]
+list = ["es1", "es2"]
+size = "2048m"
+mount_opts = "max_sectors_kb=0"
+device_path = "/dev/mapper"
+mmp_interval = "5s"
+failback = true
+
+[sfa]
+
+[HA]
+groups = [["es1", "es2"]]
+ifspeed = true
+pingd = true
+secauth = true
+start_on_boot = true
+
+[fs.e633fs.mdt]
+list = ["es1", "es2"]
+size = "90%"
+mke2fs_opts = "-m1 -i 4096 -J size=256 -E lazy_itable_init=0,lazy_journal_init=0,nodiscard -O project"
+device_path = "/dev/ddn"
+failback = true
+
+[fs.e633fs.ost]
+list = ["es1", "es2"]
+mke2fs_opts = "-m1 -i 131072 -E lazy_itable_init=0,lazy_journal_init=0,nodiscard -O project"
+mke2fs_opts_conditional = [
+  "for size > 128000000000000 apply '-E lazy_itable_init=1,nodiscard -N 1073741824 -O project'",
+]
+mount_opts = "max_sectors_kb=0"
+device_path = "/dev/ddn"
+mmp_interval = "5s"
+failback = true
+
+[host_defaults]
+corosync_links = ["enp0s3", "enp0s8"]
+grub_args = "spectre_v2=off nopti"
+lnets = ["tcp(enp0s8,enp0s9)"]
+
+[host_defaults.nic.enp0s3]
+dad_timeout = 3000
+type = "ethernet"
+netmask = "255.255.252.0"
+is_mgmt = true
+
+[host_defaults.nic.enp0s8]
+dad_timeout = 3000
+type = "ethernet"
+netmask = "255.255.255.0"
+
+[host_defaults.nic.enp0s9]
+dad_timeout = 3000
+type = "ethernet"
+netmask = "255.255.255.0"
+
+[host_defaults.sysctl]
+"vm.min_free_kbytes" = 131072
+"net.ipv4.conf.all.rp_filter" = 0
+"net.ipv4.conf.all.arp_announce" = 2
+"net.ipv4.conf.all.arp_ignore" = 1
+"net.ipv4.conf.default.rp_filter" = 2
+"net.ipv4.conf.defalut.arp_announce" = 2
+"net.ipv4.conf.default.arp_ignore" = 1
+
+[set_param_tunings]
+"mdt.*.identity_upcall" = "NONE"
+"obdfilter.*.brw_size" = 16
+"osd-ldiskfs.*.writethrough_cache_enable" = 1
+"osd-ldiskfs.*.read_cache_enable" = 0
+"osc.*.max_rpcs_in_flight" = 16
+"osc.*.max_pages_per_rpc" = "16M"
+"llite.*.max_read_ahead_mb" = 2048
+"osc.*.max_dirty_mb" = 512
+"llite.*.max_cached_mb" = 24576
+"llite.*.max_read_ahead_per_file_mb" = 256
+subsystem_debug = 0
+debug = 0
+"e633fs.quota.mdt" = "ugp"
+"e633fs.quota.ost" = "ugp"
+
+[host.es1.overrides]
+peers = ["es2"]
+
+[host.es1.fs.e633fs]
+mdt_list = [0]
+ost_list = [0]
+
+[host.es1.nic.enp0s3]
+type = "ethernet"
+ip = "192.168.102.100"
+
+[host.es1.nic.enp0s8]
+type = "ethernet"
+ip = "10.10.10.101"
+
+[host.es1.nic.enp0s9]
+type = "ethernet"
+ip = "10.10.10.102"
+
+[host.es1.modprobe_cfg.lnet]
+lnet_peer_discovery_disabled = 0
+
+[host.es2.overrides]
+peers = ["es1"]
+
+[host.es2.fs.e633fs]
+mdt_list = [1]
+ost_list = [1]
+
+[host.es2.nic.enp0s3]
+type = "ethernet"
+ip = "192.168.102.103"
+
+[host.es2.nic.enp0s8]
+type = "ethernet"
+ip = "10.10.10.104"
+
+[host.es2.nic.enp0s9]
+type = "ethernet"
+ip = "10.10.10.105"
+
+[host.es2.modprobe_cfg.lnet]
+lnet_peer_discovery_disabled = 0
+
+[EMF]
+ip = "192.168.102.106"
+nic = "enp0s3"
+size = "80.0GiB"
