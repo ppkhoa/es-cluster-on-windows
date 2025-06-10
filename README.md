@@ -13,7 +13,7 @@ Create a fully functioning Lustre cluster using DDN EXAScaler on a Windows machi
 5. Windows 10/11 on x86 CPU (not yet tested with ARM cpu)
 6. [qemu-img for Windows](https://cloudbase.it/qemu-img-windows/)
 
-Tested with [this](https://valid.x86.fr/m0du7l) configuration
+Personally tested with [this](https://valid.x86.fr/m0du7l) configuration
 
 ## Installation
 ### Create VMs
